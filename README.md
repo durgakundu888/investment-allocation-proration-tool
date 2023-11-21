@@ -1,4 +1,6 @@
-Here is the simplest way to run the app:
+Go to https://helloinvestor.netlify.app/
+
+Here is the simplest way to run locally:
 
 1. Install and open Visual Studio Code.
 2. Open the website directory from the project folder in the code editor.
