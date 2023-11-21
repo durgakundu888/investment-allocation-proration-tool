@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Investment Allocation Proration Calculator</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    </head>
+    <style>
+        body, html {
+            height: 100%;
+            background-color: #ffcfa3;
+            border-radius: 25% 10%;
+        }
+
+        .container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .box-container {
+            background-color: #654444;
+            width: 100%;
+            color: #fff7eb;
+        }
+
+        #investorForm {
+            margin: 5%;
+        }
+
+        input {
+            border: 3px solid #C21E56 !important;
+            background-color: #fff7eb !important;
+        }
+        .col, .col-sm-4 {
+            padding-right: 0;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        #result {
+            background-color: #fff7eb;
+            padding: 5%;
+            text-align: center;
+            color: #C21E56;
+            width: 100%;
+            font-weight: bold !important;
+            border-radius: 15% 0% 0% 15%;
+        }
+
+        .icon-btn {
+            margin-right: 2%;
+            align-items: center;
+            justify-content: center;
+            border-radius: 25% 10%;
+        }
+    </style>
+    <body>
+        <div class="container">
+            <div class = "row box-container">
+                <div class="col" id="investorForm">
+                    <h1>Inputs</h1>
+                    <form id="form" onsubmit="return validateAndConvert(event)">
+                        <div class="form-group" id="allocation">
+                            <label for="allocationInput" class="white-text">Total Available Allocation</label>
+                            <input type="number" step="any" min="0" class="form-control" id="allocationInput" placeholder="  $ Allocate" required>
+                        </div>
+                        <div class="form-group" id="investors">
+                            <label class="white-text">Investor Breakdown</label>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="text" class="form-control" placeholder="  Name" required>
+                                </div>
+                                <div class="col">
+                                    <input type="number" step="any" min="0" class="form-control" placeholder="  $ Request" required>
+                                </div>
+                                <div class="col">
+                                    <input type="number" step="any" min="0" class="form-control" placeholder="  $ Average" required>
+                                </div>
+                            </div>
+                
+                            <div class="row">
+                                <div class="col">
+                                    <input type="text" class="form-control" placeholder="  Name">
+                                </div>
+                                <div class="col">
+                                    <input type="number" step="any" min="0" class="form-control" placeholder="  $ Request">
+                                </div>
+                                <div class="col">
+                                    <input type="number" step="any" min="0" class="form-control" placeholder="  $ Average">
+                                </div>
+                                <div class="col">
+                                    <button class="icon-btn btn-large pink darken-4 deleteBtn" onclick="deleteInvestor(this)"><i class="fa fa-trash fa-2xl"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="icon-btn btn-large pink darken-4 addBtn" onclick="addInvestor()"><i class="fa fa-user-plus fa-2xl"></i></button>
+                        <button class="icon-btn btn-large pink darken-4 calcBtn" onclick="validateAndConvert(this)"><i class="fa fa-calculator fa-2xl"></i></button>
+                    </form>
+                </div>
+                <div class="col-sm-4" id="result">
+                    <h1>Results</h1>
+                    <div id="finalData">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+    function deleteInvestor(btn) {
+        if (btn && btn.parentNode) {
+            const investorRow = btn.parentNode.parentNode;
+            if (investorRow.parentNode) {
+                investorRow.parentNode.removeChild(investorRow);
+            }
+        }
+    }
+    function addInvestor() {
+        const investorsDiv = document.getElementById('investors');
+
+        const investorDiv = document.createElement('div');
+        investorDiv.className = 'row';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'col';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'form-control';
+        nameInput.placeholder = '  Name';
+        nameInput.required = true;
+
+        const requestedAmountDiv = document.createElement('div');
+        requestedAmountDiv.className = 'col';
+        const requestedAmountInput = document.createElement('input');
+        requestedAmountInput.type = 'number';
+        requestedAmountInput.step = 'any';
+        requestedAmountInput.min = '0';
+        requestedAmountInput.className = 'form-control';
+        requestedAmountInput.placeholder = '  $ Requested';
+        requestedAmountInput.required = true;
+
+        const averageAmountDiv = document.createElement('div');
+        averageAmountDiv.className = 'col';
+        const averageAmountInput = document.createElement('input');
+        averageAmountInput.type = 'number';
+        averageAmountInput.step = 'any';
+        averageAmountInput.min = '0';
+        averageAmountInput.className = 'form-control';
+        averageAmountInput.placeholder = '  $ Average';
+        averageAmountInput.required = true;
+
+        const deleteDiv = document.createElement('div');
+        deleteDiv.className = 'col';
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'icon-btn btn-large pink darken-4 deleteBtn';
+        deleteButton.onclick = function() {
+            if (investorsDiv && investorDiv) {
+            investorsDiv.removeChild(investorDiv);
+            } else {
+            console.error('investorsDiv or investorDiv is not defined.');
+            }
+        };
+
+        const tag = document.createElement('i');
+        tag.className = 'fa fa-trash fa-2xl';
+        tag.onclick = function() {
+            if (investorsDiv && investorDiv) {
+            investorsDiv.removeChild(investorDiv);
+            } else {
+            console.error('investorsDiv or investorDiv is not defined.');
+            }
+        };
+
+        if (investorDiv) {
+            deleteButton.appendChild(tag);
+            nameDiv.appendChild(nameInput);
+            requestedAmountDiv.appendChild(requestedAmountInput);
+            averageAmountDiv.appendChild(averageAmountInput);
+            deleteDiv.appendChild(deleteButton);
+            investorDiv.appendChild(nameDiv);
+            investorDiv.appendChild(requestedAmountDiv);
+            investorDiv.appendChild(averageAmountDiv);
+            investorDiv.appendChild(deleteDiv);
+            investorsDiv.appendChild(investorDiv);
+        } else {
+            console.error('investorDiv is not defined.');
+        }
+    }
+    function prorate(event, formData) {
+        event.preventDefault();
+        const allocationAmount = formData.allocation_amount;
+        const investorsAmounts = formData.investor_amounts;
+
+        // Calculate proration based on the specified requirements
+        const totalRequestedAmount = investorsAmounts.reduce((total, investor) => total + investor.requested_amount, 0);
+        const totalAverageAmount = investorsAmounts.reduce((total, investor) => total + investor.average_amount, 0);
+
+        if (allocationAmount >= totalRequestedAmount) {
+            // No proration needed, allocate as requested
+            return investorsAmounts.map(investor => ({
+                name: investor.name,
+                final_amount: investor.requested_amount,
+            }));
+        } else {
+            // Calculate proration based on average amount
+            const prorationFactors = investorsAmounts.map(investor => ({
+                name: investor.name,
+                factor: investor.average_amount / totalAverageAmount,
+            }));
+
+            return investorsAmounts.map(investor => ({
+                name: investor.name,
+                final_amount: allocationAmount * prorationFactors.find(current => current.name === investor.name).factor,
+            }));
+        }
+    }
+    function validateAndConvert(event) {
+        event.preventDefault();
+        const allocationInput = document.querySelector('#allocation input');
+        const investorsInputs = document.querySelectorAll('#investors .row input');
+
+        // Validate allocation input
+        const allocationValue = parseFloat(allocationInput.value);
+        if (isNaN(allocationValue) || allocationValue <= 0) {
+            alert("Please enter a valid positive number for Allocation.");
+            return;
+        }
+
+        // Collect data from the form
+        const formData = {
+            allocation_amount: allocationValue,
+            investor_amounts: [],
+        };
+
+        investorsInputs.forEach((input, index) => {
+            const investorIndex = Math.floor(index / 3); // Each investor has 3 input fields
+            const inputType = index % 3;
+
+            if (!formData.investor_amounts[investorIndex]) {
+                formData.investor_amounts[investorIndex] = {};
+            }
+
+            if (inputType > 0) {
+                let inputValue = parseFloat(input.value);
+
+                //Validate numeric inputs
+                if (isNaN(inputValue) || inputValue < 0) {
+                    alert("Please enter valid positive numbers for Requested Amount and Average Amount.");
+                    return;
+                }
+            }
+
+            switch (inputType) {
+                case 0:
+                    formData.investor_amounts[investorIndex].name = input.value;
+                    break;
+                case 1:
+                    formData.investor_amounts[investorIndex].requested_amount = parseFloat(input.value);
+                    break;
+                case 2:
+                    formData.investor_amounts[investorIndex].average_amount = parseFloat(input.value);
+                    break;
+            }
+        });
+
+        const proratedInvestorsAmounts = prorate(event, formData);
+        // Display the prorated data on the UI
+        const resultSection = document.getElementById("finalData");
+        resultSection.innerHTML = '';
+        proratedInvestorsAmounts.forEach(investor => {
+            const resultRow = document.createElement("div");
+            const num = (Math.round(investor.final_amount*Math.pow(10,2))/Math.pow(10,2)).toFixed(2);
+            resultRow.innerHTML = `${investor.name} - $${num}`;
+            resultSection.appendChild(resultRow);
+        });
+        return false;
+    }
+    </script>
+</html>
